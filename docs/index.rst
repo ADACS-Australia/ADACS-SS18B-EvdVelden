@@ -44,7 +44,7 @@ The approach taken to move the `mlxtend <https://rasbt.github.io/mlxtend/>`_ lea
 
               pip install git+https://github.com/ADACS-Australia/ADACS-SS18B-EvdVelden-mlxtend@adacs
 
-    3. Implementation of a metaclass (provided by this repository; see :py:mod:`prism_adacs.mlxtend_cuda.estimator` for code and an example of it's use) which provides all the needed support for CUDA-enabled GPU execution of `mlxtend` estimators.  The user need-only:
+    3. Implementation of a metaclass (provided by this repository; see :py:mod:`prism_adacs.mlxtend_cuda.estimator <prism_adacs.mlxtend_cuda.estimator>` for code and an example of it's use) which provides all the needed support for CUDA-enabled GPU execution of `mlxtend` estimators.  The user need-only:
 
         #. construct their estimators as they usual do, but with :code:`metaclass=CudaEstimator` instead of :code:`metaclass=type` (Python's default).
 

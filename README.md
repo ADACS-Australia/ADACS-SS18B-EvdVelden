@@ -1,8 +1,8 @@
 # prism_adacs
 
-One line description of project.
+This repository implements a GPU-enabled linear least-squares estimator for use with mlxtend.  It also presents a benchmark analysis.  See [here][https://adacs-ss18b-evdvelden.readthedocs.io/en/latest/] for more details.
 
 Contact info: [Project Homepage][1] | [Email Author][2]
 
-[1]: http://project.homepage.xyz
-[2]: mailto:gbpoole@gmail.com
+[1]: https://adacs-ss18b-evdvelden.readthedocs.io/en/latest/
+[2]: mailto:gpoole@swin.edu.au
