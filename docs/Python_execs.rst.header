@@ -1,0 +1,2 @@
+The following are executables which support and expose the functionality of this project.   They are made available at
+the command line using the Python package `Click <https://github.com/pallets/click>`_.

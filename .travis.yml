@@ -1,0 +1,39 @@
+# Configure TravisCI (https://travis-ci.org) tests
+
+language: c
+env:
+    # Set a grid of environment variables to test
+    # Make sure the home directory is set to be the TravisCI project directory
+    # The following set of lines serve as an example
+    #- USE_MPI=ON  USE_MPI_IO=OFF USE_CUDA=OFF USE_DOUBLE=OFF HOME=${TRAVIS_BUILD_DIR}
+    #- USE_MPI=ON  USE_MPI_IO=OFF USE_CUDA=OFF USE_DOUBLE=ON  HOME=${TRAVIS_BUILD_DIR}
+    #- USE_MPI=ON  USE_MPI_IO=ON  USE_CUDA=OFF USE_DOUBLE=OFF HOME=${TRAVIS_BUILD_DIR}
+    #- USE_MPI=ON  USE_MPI_IO=OFF USE_CUDA=ON  USE_DOUBLE=OFF HOME=${TRAVIS_BUILD_DIR}
+    #- USE_MPI=OFF USE_MPI_IO=OFF USE_CUDA=OFF USE_DOUBLE=ON  HOME=${TRAVIS_BUILD_DIR}
+    #- USE_MPI=OFF USE_MPI_IO=OFF USE_CUDA=ON  USE_DOUBLE=OFF HOME=${TRAVIS_BUILD_DIR}
+    - USE_MPI=OFF USE_MPI_IO=OFF USE_CUDA=OFF USE_DOUBLE=OFF HOME=${TRAVIS_BUILD_DIR}
+os:
+    - linux
+    - osx
+compiler:
+    - gcc
+    - clang
+
+# The following lines are needed by Codecov
+sudo: required
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - cmake
+
+# All the tests will be run by this Makefile
+script: |
+    make tests 
+
+# Add the following lines to generate Codecov report
+after_success: |
+    make kcov
+

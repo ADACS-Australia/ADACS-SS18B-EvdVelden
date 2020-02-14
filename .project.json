@@ -1,0 +1,20 @@
+[
+   {
+      "name": "prism_adacs"
+   },
+   {
+      "author": "Gregory B. Poole"
+   },
+   {
+      "author_email": "gpoole@swin.edu.au"
+   },
+   {
+      "description": "Python support for the ADACS GPU development of Prism."
+   },
+   {
+      "url": "https://adacs.org.au/"
+   },
+   {
+      "license": "MIT"
+   }
+]

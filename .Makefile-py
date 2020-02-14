@@ -1,0 +1,120 @@
+############################
+# Makefile for Python code #
+############################
+
+# Set default config
+ifndef config
+    config=release
+endif
+
+# Build a list of Python packages (omit the project development package)
+PKGS:=$(shell find python -maxdepth 2 -name 'setup.py' -exec dirname {} \;)
+
+# Set the build directory
+BUILD_DIR_PY:=$(PRJ_DIR)/python/build
+
+# Set targets to check for needed executables
+list_of_checks = tox pytest autopep8 docformatter $(KCOV_EXE)
+.PHONY: $(list_of_checks)
+$(list_of_checks): % : check-%-in-path
+check-%-in-path:
+	@$(if $(shell which $* >& /dev/null ; if [ $$? -ne 0 ] ; then echo fail ; fi),$(error '$*' not in path.  Please (re)install and try command again if you want this Makefile target's support))
+
+############################################
+# Python build, install, docs, etc targets #
+############################################
+
+# Perform build
+.PHONY: build-py
+build-py: $(BUILD_DIR_PY) $(addsuffix .BUILD,$(PKGS))
+$(addsuffix .BUILD,$(PKGS)):
+	@$(ECHO) "Building python package {"$(basename $@)"}..."
+	@cd $(basename $@);python setup.py build
+	@$(ECHO) "Done."
+
+# Make the build directory
+$(BUILD_DIR_PY):
+ifeq (,$(wildcard $@))
+	@$(ECHO_NNL) "Making python build directory {"$@"}..."
+	@mkdir $@
+	@$(ECHO) "Done."
+endif
+
+# Perform installation of python package
+.PHONY: install-py
+install-py: build-py $(addsuffix .INSTALL,$(PKGS))
+$(addsuffix .INSTALL,$(PKGS)): 
+	@$(ECHO) "Installing python package {"$(basename $@)"}..."
+ifeq ($(config),release)
+	@cd $(basename $@);python setup.py install
+else ifeq ($(config),develop)
+	@cd $(basename $@);python setup.py develop
+else
+    $(error Invalid python build 'config' {$(config)} specified for installation.)
+endif
+	@$(ECHO) "Done."
+
+# Clean-up Python packages
+.PHONY: clean-py
+clean-py:
+	@$(ECHO_NNL) "Cleaning-up Python debris..."
+	@cd python;find . -name '*.pyc' -exec rm -f {} +
+	@cd python;find . -name '*.pyo' -exec rm -f {} +
+	@cd python;find . -name '*~' -exec rm -f {} +
+	@cd python;find . -name '__pycache__' -exec rm -rf {} +
+	@cd python;find . -name '*.egg-info' -exec rm -rf {} +
+	@cd python;find . -name '*.eggs' -exec rm -rf {} +
+	@cd python;find . -name 'build' -exec rm -rf {} +
+	@cd python;find . -name 'dist' -exec rm -rf {} +
+	@cd python;find . -name '.tox' -exec rm -rf {} +
+	@cd python;find . -name '.pytest_cache' -exec rm -rf {} +
+	@cd python;find . -name '.coverage' -exec rm -rf {} +
+	@cd python;find . -name 'htmlcov' -exec rm -rf {} +
+	@rm -rf .src +
+	@$(ECHO) "Done."
+
+##################################
+# Python targets for developers  #
+##################################
+
+# Run Python tests
+.PHONY: tests-py
+tests-py: $(addsuffix .TEST,$(PKGS))
+$(addsuffix .TEST,$(PKGS)): check-pytest-in-path
+	@$(ECHO) "Running tests for python package..."
+	@cd $(basename $@);pytest
+	@$(ECHO) "Done."
+.PHONY: tests-py-tox
+tests-py-tox: $(addsuffix .TEST,$(PKGS))
+$(addsuffix .TEST-TOX,$(PKGS)): check-tox-in-path
+	@$(ECHO) "Running tests for python package..."
+	@cd $(basename $@);tox --develop # Use `tox --develop` to not make an sdist or install local package (see tox docs for info)
+	@$(ECHO) "Done."
+
+#Compute Python test coverage
+.PHONY: coverage-py
+coverage-py: tests-py $(addsuffix .COV,$(PKGS))
+$(addsuffix .COV,$(PKGS)): check-$(KCOV_EXE)-in-path
+	@$(ECHO_NNL) "Generating Python test coverage report for package {"$(basename $@)"}..."
+	@cd $(basename $@);$(KCOV_EXE) python setup.py test
+	@cd $(basename $@);$(KCOV_EXE) report -m
+	@cd $(basename $@);$(KCOV_EXE) html
+	@$(ECHO) "Done."
+
+# Check Python formatting against PEP8 (exception: max line lengths are 120)
+.PHONY: lint-check-py
+lint-check-py: $(addsuffix .LINT-CHECK,$(PKGS))
+$(addsuffix .LINT-CHECK,$(PKGS)): check-autopep8-in-path check-docformatter-in-path
+	@$(ECHO_NNL) "Linting python package {"$(basename $@)"}..."
+	@cd $(basename $@);autopep8 -a -a --max-line-length 120 --diff --exclude=*.tox -r . 
+	@cd $(basename $@);docformatter -r . 
+	@$(ECHO) "Done."
+
+# Apply Python PEP8 formatting (exception: max line lengths are 120) suggestions in-place
+.PHONY: lint-fix-py
+lint-fix-py: $(addsuffix .LINT-FIX,$(PKGS))
+$(addsuffix .LINT-FIX,$(PKGS)): check-autopep8-in-path check-docformatter-in-path
+	@$(ECHO_NNL) "Applying linting suggestions to python package {"$(basename $@)"}..."
+	@cd $(basename $@);autopep8 -i -a -a --max-line-length 120 --exclude=*.tox -r . 
+	@cd $(basename $@);docformatter -i -r . 
+	@$(ECHO) "Done."

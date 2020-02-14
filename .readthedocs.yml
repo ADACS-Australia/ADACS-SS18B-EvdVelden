@@ -1,0 +1,9 @@
+# Configure Readthedocs
+
+requirements_file: .requirements_rtd.txt
+
+build:
+    image: latest
+
+python:
+    version: 3.6
